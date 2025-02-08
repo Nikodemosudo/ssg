@@ -70,7 +70,7 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(str(context.exception), "No img/URL detected")
 
     def test_unknown(self):
-        node = TextNode("I am text", TextType.NORMAL, None)
+        node = TextNode("I am text", TextType.TEXT, None)
         node.text_type = "not_a_valid_type"
         with self.assertRaises(Exception) as context:
             text_node_to_html_node(node)
