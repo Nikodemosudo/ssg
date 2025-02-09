@@ -1,7 +1,7 @@
 import unittest
 
 from textnode import TextType, TextNode
-from node_splitter import split_nodes_delimiter
+from node_splitter import split_nodes_delimiter, split_nodes_image, split_nodes_link
 
 class TestHTMLNode(unittest.TestCase):
 
@@ -33,6 +33,77 @@ class TestHTMLNode(unittest.TestCase):
             split_nodes_delimiter(input_nodes, "**", TextType.BOLD)
         self.assertEqual(str(context.exception), "This is invalid Markdown syntax")
 
-    
+    # Tests for the image node splitter
 
-        
+    def test_image_split(self):
+        input_node = [TextNode("Here is an image ![alt](https://example.com/img.png)", TextType.TEXT)]
+        result = [
+            TextNode("Here is an image ", TextType.TEXT),
+            TextNode("alt", TextType.IMAGE, "https://example.com/img.png")
+        ]
+        self.assertEqual(split_nodes_image(input_node), result)
+
+    def test_multi_images(self):
+        input_node = [TextNode("First ![img1](https://img1.png) and second ![img2](https://img2.png)", TextType.TEXT)]
+        result = [
+            TextNode("First ", TextType.TEXT),
+            TextNode("img1", TextType.IMAGE, "https://img1.png"),
+            TextNode(" and second ", TextType.TEXT),
+            TextNode("img2", TextType.IMAGE, "https://img2.png")
+        ]
+        self.assertEqual(split_nodes_image(input_node), result)
+
+    def test_no_image(self):
+        input_node = [TextNode("This text has no images.", TextType.TEXT)]
+        result = [TextNode("This text has no images.", TextType.TEXT)]
+        self.assertEqual(split_nodes_image(input_node), result)
+    
+    def test_image_start(self):
+        input_node = [TextNode("![start](https://startimage.com) and text", TextType.TEXT)]
+        result = [
+            TextNode("", TextType.TEXT),
+            TextNode("start", TextType.IMAGE, "https://startimage.com"),
+            TextNode(" and text", TextType.TEXT)
+        ]
+        self.assertEqual(split_nodes_image(input_node), result)
+
+    def test_image_end(self):
+        input_node = [TextNode("Text first and then ![end](https://endimage.com)", TextType.TEXT)]
+        result = [
+            TextNode("Text first and then ", TextType.TEXT),
+            TextNode("end", TextType.IMAGE, "https://endimage.com"),    
+        ]
+        self.assertEqual(split_nodes_image(input_node), result)
+
+    # Test for link node splitter
+
+    def test_link_split(self):
+        input_node = [TextNode("Check out [Google](https://google.com)", TextType.TEXT)]
+        result = [
+            TextNode("Check out ", TextType.TEXT),
+            TextNode("Google", TextType.LINK, "https://google.com")
+        ]
+        self.assertEqual(split_nodes_link(input_node), result)
+
+    def test_multi_link(self):
+        input_node = [TextNode("Hey [Link1](https://link1.com) and [Link2](https://link2.com)", TextType.TEXT)]
+        result = [
+            TextNode("Hey ", TextType.TEXT),
+            TextNode("Link1", TextType.LINK, "https://link1.com"),
+            TextNode(" and ", TextType.TEXT),
+            TextNode("Link2", TextType.LINK, "https://link2.com")
+        ]
+        self.assertEqual(split_nodes_link(input_node), result)
+
+    def test_nolink(self):
+        input_node = [TextNode("There are no links here!", TextType.TEXT)]
+        result = [TextNode("There are no links here!", TextType.TEXT)]
+        self.assertEqual(split_nodes_link(input_node), result)
+
+    def test_end_link(self):
+        input_node = [TextNode("This link is right at the [End](https://linkend.com)", TextType.TEXT)]
+        result = [
+            TextNode("This link is right at the ", TextType.TEXT),
+            TextNode("End", TextType.LINK, "https://linkend.com")
+        ]
+        self.assertEqual(split_nodes_link(input_node), result)
