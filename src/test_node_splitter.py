@@ -1,7 +1,7 @@
 import unittest
 
 from textnode import TextType, TextNode
-from node_splitter import split_nodes_delimiter, split_nodes_image, split_nodes_link
+from node_splitter import split_nodes_delimiter, split_nodes_image, split_nodes_link, text_to_textnodes
 
 class TestHTMLNode(unittest.TestCase):
 
@@ -107,3 +107,97 @@ class TestHTMLNode(unittest.TestCase):
             TextNode("End", TextType.LINK, "https://linkend.com")
         ]
         self.assertEqual(split_nodes_link(input_node), result)
+
+    # Tests for the final text_to_textnodes function
+
+    def test_bold(self):
+        input_node = "This is **bold** text"
+        result = [
+            TextNode("This is ", TextType.TEXT),
+            TextNode("bold", TextType.BOLD),
+            TextNode(" text", TextType.TEXT)
+        ]
+        self.assertEqual(text_to_textnodes(input_node), result)
+
+    def test_italic(self):
+        input_node = "This is *italic* text"
+        result = [
+            TextNode("This is ", TextType.TEXT),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" text", TextType.TEXT)
+        ]
+        self.assertEqual(text_to_textnodes(input_node), result)
+
+    def test_code(self):
+        input_node = "This is `code` text"
+        result = [
+            TextNode("This is ", TextType.TEXT),
+            TextNode("code", TextType.CODE),
+            TextNode(" text", TextType.TEXT)
+        ]
+        self.assertEqual(text_to_textnodes(input_node), result)
+
+    def test_multip_image(self):
+        input_node = "First ![img1](https://img1.png) and second ![img2](https://img2.png)"
+        result = [
+            TextNode("First ", TextType.TEXT),
+            TextNode("img1", TextType.IMAGE, "https://img1.png"),
+            TextNode(" and second ", TextType.TEXT),
+            TextNode("img2", TextType.IMAGE, "https://img2.png")
+        ]
+        self.assertEqual(text_to_textnodes(input_node), result)
+    
+    def test_multip_link(self):
+        input_node = "First [link1](https://link1.com) and second [link2](https://link2.com)"
+        result = [
+            TextNode("First ", TextType.TEXT),
+            TextNode("link1", TextType.LINK, "https://link1.com"),
+            TextNode(" and second ", TextType.TEXT),
+            TextNode("link2", TextType.LINK, "https://link2.com")
+        ]
+        self.assertEqual(text_to_textnodes(input_node), result)
+    
+    def test_bold_italic(self):
+        input_node = "This is **bold** and *italic*"
+        result = [
+            TextNode("This is ", TextType.TEXT),
+            TextNode("bold", TextType.BOLD),
+            TextNode(" and ", TextType.TEXT),
+            TextNode("italic", TextType.ITALIC)
+        ]
+        self.assertEqual(text_to_textnodes(input_node), result)
+
+    def test_link_code(self):
+        input_node = "Check [this link](https://thislink.com) with `code`."
+        result = [
+            TextNode("Check ", TextType.TEXT),
+            TextNode("this link", TextType.LINK, "https://thislink.com"),
+            TextNode(" with ", TextType.TEXT),
+            TextNode("code", TextType.CODE),
+            TextNode(".", TextType.TEXT)
+        ]
+        self.assertEqual(text_to_textnodes(input_node), result)
+
+    def test_empty_string(self):
+        input_node = ""
+        result = []
+        self.assertEqual(text_to_textnodes(input_node), result)
+
+    def test_double_delimiter(self):
+        input_node = "We got double **bold****words**!"
+        result = [
+            TextNode("We got double ", TextType.TEXT),
+            TextNode("bold", TextType.BOLD),
+            TextNode("words", TextType.BOLD),
+            TextNode("!", TextType.TEXT)
+        ]
+        self.assertEqual(text_to_textnodes(input_node), result)
+
+    def test_unbalanced_delimiter(self):
+        input_node = "This is **bold and not closed"
+        with self.assertRaises(Exception) as context:
+            text_to_textnodes(input_node)
+        self.assertEqual(str(context.exception), "This is invalid Markdown syntax")
+        
+
+    

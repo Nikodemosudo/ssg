@@ -18,7 +18,8 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
             # Pattern is always "TextType.TEXT - TextType.BOLD/ITALIC/CODE" - "TextType.TEXT"
             for split in splits:
                 if index % 2 == 0:
-                    splitted.append(TextNode(split, TextType.TEXT))
+                    if split:
+                        cleasplitted.append(TextNode(split, TextType.TEXT))
                 else:
                     splitted.append(TextNode(split, text_type))
                 index += 1
@@ -115,6 +116,19 @@ def split_nodes_link(old_nodes):
                 result.append(TextNode(current_text, TextType.TEXT))
     
     return result
+
+
+
+def text_to_textnodes(text):
+    nodes = [TextNode(text, TextType.TEXT)]
+    nodes = split_nodes_image(nodes)
+    nodes = split_nodes_link(nodes)
+    nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD)
+    nodes = split_nodes_delimiter(nodes, "*", TextType.ITALIC)
+    nodes = split_nodes_delimiter(nodes, "`", TextType.CODE)
+
+    return nodes
+
 
 
      
