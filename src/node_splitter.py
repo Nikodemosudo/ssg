@@ -19,7 +19,7 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
             for split in splits:
                 if index % 2 == 0:
                     if split:
-                        cleasplitted.append(TextNode(split, TextType.TEXT))
+                        splitted.append(TextNode(split, TextType.TEXT))
                 else:
                     splitted.append(TextNode(split, text_type))
                 index += 1
