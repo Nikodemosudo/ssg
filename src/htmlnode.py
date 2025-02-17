@@ -19,6 +19,16 @@ class HTMLNode:
             propstr.append(f'{key}="{value}"')
         return " " + " ".join(propstr)
     
+    def __eq__(self, other):
+        if not isinstance(other, HTMLNode):
+            return False
+        return (
+            self.tag == other.tag and
+            self.value == other.value and
+            self.children == other.children and
+            self.props == other.props
+        )
+    
     def __repr__(self):
         return f'HTMLNode(tag= "{self.tag}", value= "{self.value}", children= "{self.children}", props= "{self.props}")'
     
@@ -40,6 +50,8 @@ class LeafNode(HTMLNode):
             return f'<{self.tag}{attributes}>{self.value}</{self.tag}>'
     
     def __eq__(self, other):
+        if not isinstance(other, LeafNode):
+            return False
         return (
             self.tag == other.tag
             and self.value == other.value
@@ -69,6 +81,15 @@ class ParentNode(HTMLNode):
                 string += child.to_html()
             string += f"</{self.tag}>"
         return string
+    
+    def __eq__(self, other):
+        if not isinstance(other, ParentNode):
+            return False
+        return (
+            self.tag == other.tag and
+            self.children == other.children and
+            self.props == other.props
+        )
     
     def __repr__(self):
         return f'ParentNode(tag= "{self.tag}", children= "{self.children}", props= "{self.props}")'
