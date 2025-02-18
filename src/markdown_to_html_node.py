@@ -34,18 +34,22 @@ def markdown_to_html_node(markdown):
             code_node = LeafNode("code", code_content)
             node = ParentNode("pre", [code_node])
         
+        
+
         elif block_type == "quote":
-            quote_text = "\n".join(line.lstrip("> ").strip() for line in block.split("\n"))
-
-        # ✅ If the blockquote is just a simple line of text, treat it as raw text
-            if "\n" not in quote_text and not quote_text.startswith(("-", "*", "1.")):
-                children = [LeafNode(None, quote_text)]  # Just a LeafNode, no paragraph
+            # Remove '>' and leading/trailing whitespace from each line
+            quote_lines = [line.lstrip(">").strip() for line in block.split("\n")]
+            # Join lines with spaces to form a single paragraph
+            quote_text = " ".join(line for line in quote_lines if line)
+            
+            if quote_text:  # Make sure we have content
+                # Create text nodes from the quote text
+                children = text_to_children(quote_text)
             else:
-                children = markdown_to_html_node(quote_text).children  # Recursively parse if complex
-
+                children = []
+    
             node = ParentNode("blockquote", children)
 
-        
         elif block_type == "unordered_list":
             items = []
             for line in block.split('\n'):
@@ -78,13 +82,3 @@ def text_to_children(text):
         html_node = text_node_to_html_node(node)
         html_nodes.append(html_node)
     return html_nodes
-
-
-
-    
-
-
-
-
-
-
